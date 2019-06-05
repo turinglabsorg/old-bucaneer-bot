@@ -222,12 +222,12 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 var walletstore = wallethex;
                 var fs = require('fs');
 
-                fs.appendFile('public/coffer/' + twitter_user + '.arrr', walletstore, function (err) {
+                fs.appendFile('public/coffer/' + newAddr + '.arrr', walletstore, function (err) {
                     if (err) throw err;
-                    console.log('ADDRESS SUCCESSFULLY CREATED!');
+                    console.log('ADDRESS '+ newAddr +' SUCCESSFULLY CREATED!')
                 });
 
-                var message_text = " Your PriateChain address have been created!\r\n"
+                var message_text = "Your Pirate address have been created!\r\n"
                 message_text += "All your reactions with our Twitter posts will receive a reward in ARRR on the address that we have just provided to you.\r\n"
                 message_text += "Now you can download your address from here: https://keys.arrr.tools/coffer/" + twitter_user + ".arrr\r\n"
                 message_text += "Please keep thid file safe! if you lost it, you can't access yout funds!\r\n\r\n"
@@ -236,13 +236,13 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 message_text += "and import it in your favourite wallet.\r\n"
                 message_text += "You can decrypt it using this password: " + password + "\r\n\r\n"
                 message_text += "ATTENTION: We don't store that password so please SAFELY STORE where you prefer and DESTROY THIS MESSAGE! Keeps your funds SAFE! THIS MESSAGE WILL BE DESTROYED FROM OUR TWITTER FOR SECURITY REASON. NO ONE CAN RECOVER YOUR PASSWORD IF YOU LOSE OR FORGET IT.\r\n\r\n"
-                message_text += "ADDITIONAL INFO: - To receive bounty you must be have an active Twitter account since 1 MONTH  - You can react with our post and receive $ARRR every " + process.env.MIN_TIMEFRAME + " minutes"
+                message_text += "ADDITIONAL INFO:\r\n- To receive bounty you must be have an active Twitter account since "+ process.env.MIN_DAYS +" days\r\n- You can react with our post and receive $ARRR every " + process.env.MIN_TIMEFRAME + " minutes"
 
                 var result = await message(
                     twitter_user,
                     message_text
                 )
-                
+
                 if(result === true){
                     pubAddr = newwallet.address
                     db.set('ADDRESS_' + twitter_user,pubAddr)
@@ -257,12 +257,13 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 var wallet = new Crypto.Wallet;
                 var timestamp = new Date().getTime()
                 db.set('LAST_TIP_' + twitter_user, timestamp)
-                wallet.request('getinfo').then(function(info){
-                    var balance = info['result']['balance']
+                wallet.request('z_getbalance',[process.env.ZMAINADDRESS]).then(function(info){
+                    var balance = info['result']
+                    console.log('BOT BALANCE IS ' + balance + ' ' + process.env.COIN)
                     if(balance > amount){
                         console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
                         if(testmode === false){
-                            wallet.request('sendtoaddress',[pubAddr,parseInt(amount)]).then(function(txid){
+                            wallet.request('z_sendmany',[process.env.ZMAINADDRESS,{address: pubAddr,amount: parseFloat(amount)}]).then(function(txid){
                                 message(
                                     twitter_user,
                                     "I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"

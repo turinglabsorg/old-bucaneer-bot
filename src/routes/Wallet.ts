@@ -14,7 +14,3 @@ export async function getinfo(req: express.Request, res: express.Response) {
     })
 };
 
-export async function sendtoaddress(address, amount) {
-    var wallet = new Crypto.Wallet;
-    //TODO
-};
