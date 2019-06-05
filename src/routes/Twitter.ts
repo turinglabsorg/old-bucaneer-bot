@@ -129,7 +129,6 @@ export async function followers(twitter_user) {
 
 export async function mentions(twitter_user) {
     console.log('LOOKING FOR @'+twitter_user+' MENTIONS')
-
     Twitter.get('search/tweets', {q: '@' + twitter_user}, async function(err, data) {
         if(!err){
             var found = data.statuses
@@ -200,17 +199,21 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 pubAddr = address
             }else{
                 //CREATE ADDRESS FOR USER
-                var zaddr
-                while(zaddr.address !== undefined){
-                    zaddr = await axios.get('https://pk1.arrr.tools')
-                    if(zaddr.address === undefined){
+                var newAddr = ''
+                while(newAddr === ''){
+                    console.log('ASKING FOR A NEW ADDRESS')
+                    var zaddr = await axios.get('https://pk1.arrr.tools')
+                    if(zaddr.data.address === undefined){
+                        console.log('FIRST PROVIDER IS BUSY, CHECKING SECOND ONE')
                         zaddr = await axios.get('https://pk2.arrr.tools') 
                     }
+                    if(zaddr.data.address !== undefined){
+                        newAddr = zaddr.data.address
+                    }
                 }
-
                 var buf = crypto.randomBytes(16);
                 var password = buf.toString('hex');
-                var newwallet = zaddr.response.data
+                var newwallet = zaddr.data
                 
                 const cipher = crypto.createCipher('aes-256-cbc', password);
                 let wallethex = cipher.update(JSON.stringify(newwallet), 'utf8', 'hex');
