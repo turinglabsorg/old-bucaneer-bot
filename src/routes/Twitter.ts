@@ -5,7 +5,6 @@ var db = redis.createClient()
 const {promisify} = require('util')
 const getmembers = promisify(db.smembers).bind(db)
 const get = promisify(db.get).bind(db)
-var CoinKey = require('coinkey')
 import * as Crypto from '../libs/Crypto'
 var crypto = require('crypto');
 var axios = require('axios');
