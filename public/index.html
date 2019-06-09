@@ -32,9 +32,10 @@
                 <div class="row">
                     <div class="col-sm-6 offset-sm-3 text-center">
                         <img src="/Pirate_Logo_WG.png" style="padding:5% 0 20px 0" width="30%"><br>
-                        ARRR! I'm the Old Bucaneer<br>
-                        Please follow my instructions and claim your arrrdress!<br><br>
-                        Select your .arrr file and write the password:
+                        I'm the Old Bucaneer<br>
+                        Please follow my instructions and claim your $ARRR!<br><br>
+                        First download the file from the link i sent via DM.<br>
+                        Then select your .arrr file and write the password:
                         <b-form-file
                             style="overflow: hidden"
                             v-model="file"
@@ -88,7 +89,7 @@
                        var wallet = app.encryptedWallet
                        var password = app.walletPassword
                        app.ARRR.readKey(password,wallet).then(result => {
-                            if(result === 'WRONG PASSWORD'){
+                            if(result === false){
                                 alert('WRONG PASSWORD!')
                             }else{
                                 var decrypted = JSON.parse(result)
