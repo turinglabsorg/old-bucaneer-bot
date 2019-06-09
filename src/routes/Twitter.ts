@@ -258,24 +258,28 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 var timestamp = new Date().getTime()
                 db.set('LAST_TIP_' + twitter_user, timestamp)
                 wallet.request('z_getbalance',[process.env.ZMAINADDRESS]).then(function(info){
-                    var balance = info['result']
-                    console.log('BOT BALANCE IS ' + balance + ' ' + process.env.COIN)
-                    if(balance > amount){
-                        console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
-                        if(testmode === false){
-                            wallet.request('z_sendmany',[process.env.ZMAINADDRESS,{address: pubAddr,amount: parseFloat(amount)}]).then(function(txid){
-                                message(
-                                    twitter_user,
-                                    "I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"
-                                )
-                                console.log('TXID IS ' + txid['result'])
-                                response(txid['result'])
-                            })
+                    if(info !== undefined){
+                        var balance = info['result']
+                        console.log('BOT BALANCE IS ' + balance + ' ' + process.env.COIN)
+                        if(balance > amount){
+                            console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
+                            if(testmode === false){
+                                wallet.request('z_sendmany',[process.env.ZMAINADDRESS,{address: pubAddr,amount: parseFloat(amount)}]).then(function(txid){
+                                    message(
+                                        twitter_user,
+                                        "I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"
+                                    )
+                                    console.log('TXID IS ' + txid['result'])
+                                    response(txid['result'])
+                                })
+                            }else{
+                                response('TXIDHASH')
+                            }
                         }else{
-                            response('TXIDHASH')
+                            console.log('OPS, NOT ENOUGH FUNDS!')
                         }
                     }else{
-                        console.log('OPS, NOT ENOUGH FUNDS!')
+                        console.log('OPS, WALLET NOT RUNNING!')
                     }
                 })
             }

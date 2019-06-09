@@ -8,24 +8,98 @@
         <!-- Load required Bootstrap and BootstrapVue CSS -->
         <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
         <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+        <link type="text/css" rel="stylesheet" href="/fonts/fontsheet.css" />
         <!-- Load polyfills to support older browsers -->
         <script src="//polyfill.io/v3/polyfill.min.js?features=es2015%2CMutationObserver" crossorigin="anonymous"></script>
         <!-- Load Vue followed by BootstrapVue -->
-        <script src="//unpkg.com/vue@latest/dist/vue.min.js"></script>
-        <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+        <script src="https://unpkg.com/vue@latest/dist/vue.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script type="text/javascript" src="/arrr.js"></script>
         <link rel=icon href="/fav.png">
     </head>
-
+    <style>
+        body{
+            background:#000;
+            color:#fff;
+            font-family: 'bai_jamjureeregular';
+            font-size: 18px;
+        }
+    </style>
     <body>
         <div id="app">
-            {{ message }}
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-6 offset-sm-3 text-center">
+                        <img src="/Pirate_Logo_WG.png" style="padding:5% 0 20px 0" width="30%"><br>
+                        ARRR! I'm the Old Bucaneer<br>
+                        Please follow my instructions and claim your arrrdress!<br><br>
+                        Select your .arrr file and write the password:
+                        <b-form-file
+                            style="overflow: hidden"
+                            v-model="file"
+                            placeholder="Choose arrr file..."
+                            drop-placeholder="Drop arrr file here..."
+                            @change="loadWalletFromFile"
+                        ></b-form-file>
+                        <b-input-group prepend="Password">
+                            <b-form-input v-model="walletPassword" type="password"></b-form-input>
+                        </b-input-group>
+                        <br>
+                        <b-button v-on:click="decryptWallet">DECRYPT ADDRESS</b-button>
+                        <div v-if="pubkey">
+                            <br><br>
+                            <h3>Wallet decrypted!</h3>
+                            This is your address: <br>
+                            <pre style="overflow-x:scroll; color:#fff; font-size:10px">{{ pubkey }}</pre><br>
+                            This is your private key:<br>
+                            <pre style="overflow-x:scroll; color:#fff; font-size:10px;">{{ privkey }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
     <script>
         var app = new Vue({
             el: '#app',
             data: {
-                message: 'Hello From the Old Bucaneer!'
+                file: '',
+                encryptedWallet: '',
+                walletPassword: '',
+                pubkey: '',
+                privkey: '',
+                ARRR: window.ARRR
+            },
+            methods: {
+                loadWalletFromFile(ev) {
+                    const file = ev.target.files[0];
+                    const reader = new FileReader();
+                    var app = this;
+                    reader.onload = function() {
+                        var dataKey = reader.result;
+                        app.encryptedWallet = dataKey
+                    };
+                    reader.readAsText(file);
+                },
+                decryptWallet(){
+                    const app = this
+                    if(app.encryptedWallet !== '' && app.walletPassword !== ''){
+                       var wallet = app.encryptedWallet
+                       var password = app.walletPassword
+                       app.ARRR.readKey(password,wallet).then(result => {
+                            if(result === 'WRONG PASSWORD'){
+                                alert('WRONG PASSWORD!')
+                            }else{
+                                var decrypted = JSON.parse(result)
+                                app.pubkey = decrypted.address
+                                app.privkey = decrypted.privkey
+                            }
+                       })
+                    }else{
+                        alert('Ops! I need a file and a password!')
+                    }
+                }
             }
         })
     </script>

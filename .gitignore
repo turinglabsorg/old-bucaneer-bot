@@ -3,3 +3,4 @@
 .env
 /public/coffer/*
 log
+/arrr-decypher/node_modules
