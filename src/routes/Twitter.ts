@@ -266,7 +266,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                                 wallet.request('z_sendmany',[process.env.ZMAINADDRESS,{address: pubAddr,amount: parseFloat(amount)}]).then(function(txid){
                                     message(
                                         twitter_user,
-                                        "I've sent " + amount + " $" + coin + " to you! Check your TXID: " + txid['result'] + "!"
+                                        "I've sent " + amount + " $" + coin + " to you!"
                                     )
                                     console.log('TXID IS ' + txid['result'])
                                     response(txid['result'])
