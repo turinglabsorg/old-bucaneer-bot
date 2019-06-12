@@ -311,6 +311,9 @@ export async function message(twitter_user, message) {
                     }else{
                         response(false)
                     }
+                }).catch(err => {
+                    console.log('CAN\'T SEND MESSAGE')
+                    response(false)
                 })
             }else{
                 response(true)
