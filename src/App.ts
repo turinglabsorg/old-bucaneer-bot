@@ -2,6 +2,7 @@ import * as express from 'express'
 import * as Utilities from './libs/Utilities'
 import * as Interface from "./routes/Interface"
 import * as Twitter from "./routes/Twitter"
+import * as Crypto from './libs/Crypto'
 
 var bodyParser = require('body-parser')
 var cors = require('cors')
@@ -20,7 +21,7 @@ class App {
     app.express.get('/',Interface.rendervue)
     app.express.get('/twitter/request-token',Twitter.getAuth)
     app.express.get('/twitter/callback',Twitter.getAccessToken)
-
+    var wallet = new Crypto.Wallet;
     if(process.env.TWITTER_USERNAME !== undefined){
       Twitter.followers(process.env.TWITTER_USERNAME)
       Twitter.mentions(process.env.TWITTER_USERNAME)

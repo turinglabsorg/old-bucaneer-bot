@@ -263,10 +263,10 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                         if(balance > amount){
                             console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
                             if(testmode === false){
-                                wallet.request('z_sendmany',[process.env.ZMAINADDRESS,{address: pubAddr,amount: parseFloat(amount)}]).then(function(txid){
+                                wallet.request('z_sendmany',[process.env.ZMAINADDRESS,[{address: pubAddr,amount: parseFloat(amount)}]]).then(function(txid){
                                     message(
                                         twitter_user,
-                                        "I've sent " + amount + " $" + coin + " to you!"
+                                        "I've sent " + amount + " $" + coin + " to you! This is the OPID: " + txid['result']
                                     )
                                     console.log('TXID IS ' + txid['result'])
                                     response(txid['result'])
