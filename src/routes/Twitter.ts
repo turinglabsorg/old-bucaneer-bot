@@ -228,7 +228,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
 
                 var message_text = "Your Pirate address have been created!\r\n"
                 message_text += "All your reactions with our Twitter posts will receive a reward in ARRR on the address that we have just provided to you.\r\n"
-                message_text += "Now you can download your address from here: https://keys.arrr.tools/coffer/" + twitter_user + ".arrr\r\n"
+                message_text += "Now you can download your address from here: https://keys.arrr.tools/coffer/" + newAddr + ".arrr\r\n"
                 message_text += "Please keep thid file safe! if you lost it, you can't access yout funds!\r\n\r\n"
                 message_text += "You can decrypt this file from: \r\n"
                 message_text += "https://keys.arrr.tools\r\n"
