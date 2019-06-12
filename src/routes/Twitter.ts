@@ -153,9 +153,14 @@ export async function mentions(twitter_user) {
                             var elapsed = diff / (1000*60*60*24)
                             if(elapsed > parseInt(process.env.MIN_DAYS)){
                                 newmentions++
-                                db.set('USER_' + user_mention, mentions[index].user.id_str)
-                                db.sadd('MENTIONS_' + twitter_user, mention_id)
-                                await tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                                var success = await tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
+                                if(success !== false){
+                                    db.set('USER_' + user_mention, mentions[index].user.id_str)
+                                    db.sadd('MENTIONS_' + twitter_user, mention_id)
+                                    console.log('SENT WAS OK, STORING INFORMATION')
+                                }else{
+                                    console.log('SENT WAS NOT SUCCESSFUL')
+                                }
                             }else{
                                 console.log('USER '+user_mention+' IS TOO YOUNG.')
                             }
@@ -254,13 +259,13 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
 
             if(pubAddr !== ''){
                 var wallet = new Crypto.Wallet;
-                var timestamp = new Date().getTime()
-                db.set('LAST_TIP_' + twitter_user, timestamp)
                 wallet.request('z_getbalance',[process.env.ZMAINADDRESS]).then(function(info){
                     if(info !== undefined){
                         var balance = info['result']
                         console.log('BOT BALANCE IS ' + balance + ' ' + process.env.COIN)
                         if(balance > amount){
+                            var timestamp = new Date().getTime()
+                            db.set('LAST_TIP_' + twitter_user, timestamp)
                             console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
                             if(testmode === false){
                                 wallet.request('z_sendmany',[process.env.ZMAINADDRESS,[{address: pubAddr,amount: parseFloat(amount)}]]).then(function(txid){
@@ -275,6 +280,7 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                                 response('TXIDHASH')
                             }
                         }else{
+                            response(false)
                             console.log('OPS, NOT ENOUGH FUNDS!')
                         }
                     }else{
