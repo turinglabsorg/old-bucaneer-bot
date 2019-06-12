@@ -253,9 +253,11 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 }else{
                     if(testmode === false){
                         try{ 
-                            Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
+                            Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' }).catch(err =>{
+                                console.log('CAN\'T POST MESSAGE OR JUST SENT YET')
+                            })
                         }catch(e){
-                            console.log('CAN\'T POST MESSAGE OR JUST SENT')
+                            console.log('CAN\'T POST MESSAGE OR JUST SENT YET')
                         }
                     }
                 }
