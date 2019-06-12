@@ -252,7 +252,11 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                     db.set('ADDRESS_' + twitter_user,pubAddr)
                 }else{
                     if(testmode === false){
-                        Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
+                        try{ 
+                            Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' })
+                        }catch(e){
+                            console.log('CAN\'T POST MESSAGE OR JUST SENT')
+                        }
                     }
                 }
             }
@@ -305,21 +309,13 @@ export async function message(twitter_user, message) {
         if(twitter_id !== null){
             if(testmode === false){
                 var msg = {"event": {"type": "message_create", "message_create": {"target": {"recipient_id": twitter_id}, "message_data": {"text": message}}}}
-                try {
-                    Twitter.post('direct_messages/events/new', msg, function(err, data){
-                        if(data.event !== undefined){
-                            response(true)
-                        }else{
-                            response(false)
-                        }
-                    }).catch(err => {
-                        console.log('CAN\'T SEND MESSAGE')
+                Twitter.post('direct_messages/events/new', msg, function(err, data){
+                    if(data.event !== undefined){
+                        response(true)
+                    }else{
                         response(false)
-                    })
-                }catch(e){
-                    console.log('CAN\'T SEND MESSAGE')
-                    response(false)
-                }
+                    }
+                })
             }else{
                 response(true)
             }
