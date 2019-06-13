@@ -293,6 +293,8 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                         console.log('OPS, WALLET NOT RUNNING!')
                     }
                 })
+            }else{
+                response(false)
             }
         }else{
             var result = await message(
