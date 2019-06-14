@@ -100,6 +100,7 @@ export async function followers(twitter_user) {
                 var user_follow = followers[index].screen_name
                 var user_mention_followers = followers[index].followers_count
                 if(user_mention_followers >= process.env.MIN_FOLLOWERS){
+                    db.set('USER_' + user_follow,  followers[index].id_str)
                     if(tipped.indexOf(user_follow) === -1){
                         var user_registration = new Date(followers[index].created_at)
                         var now = new Date(); 
@@ -108,7 +109,6 @@ export async function followers(twitter_user) {
                         if(elapsed >= parseInt(process.env.MIN_DAYS)){
                             newfollowers ++
                             console.log('NEW FOLLOWER: ' + user_follow + '!')
-                            db.set('USER_' + user_follow,  followers[index].id_str)
                             db.sadd('FOLLOW_' + twitter_user, user_follow)
                             tipuser(user_follow,'FOLLOW',twitter_user,process.env.TIP_FOLLOW,process.env.COIN)
                         }else{
@@ -152,10 +152,10 @@ export async function mentions(twitter_user) {
                             var diff = now.getTime() - user_registration.getTime();
                             var elapsed = diff / (1000*60*60*24)
                             if(elapsed > parseInt(process.env.MIN_DAYS)){
+                                db.set('USER_' + user_mention, mentions[index].user.id_str)
                                 newmentions++
                                 var success = await tipuser(user_mention,'MENTION', mention_id, process.env.TIP_MENTION, process.env.COIN)
                                 if(success !== false){
-                                    db.set('USER_' + user_mention, mentions[index].user.id_str)
                                     db.sadd('MENTIONS_' + twitter_user, mention_id)
                                     console.log('SENT WAS OK, STORING INFORMATION')
                                 }else{
