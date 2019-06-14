@@ -314,6 +314,9 @@ export async function message(twitter_user, message) {
             if(testmode === false){
                 var msg = {"event": {"type": "message_create", "message_create": {"target": {"recipient_id": twitter_id}, "message_data": {"text": message}}}}
                 Twitter.post('direct_messages/events/new', msg, function(err, data){
+                    if(err){
+                        console.log(err)
+                    }
                     if(data.event !== undefined){
                         response(true)
                     }else{
