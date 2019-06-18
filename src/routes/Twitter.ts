@@ -12,7 +12,8 @@ var twitterlogin = require("node-twitter-api")
 var os = require('os')
 var config = require('../config.js');
 var testmode = process.env.TESTMODE.toLowerCase() == 'true' ? true : false;
-
+var exec = require('child_process').exec;
+ 
 if(testmode === true){
     console.log('\x1b[33m%s\x1b[0m', 'RUNNING IN TEST MODE')
 }
@@ -201,108 +202,109 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
             if(address !== null){
                 //SEND TO ADDRESS
                 pubAddr = address
+                var tx = await sendtip(pubAddr,amount,twitter_user)
+                response(tx)
             }else{
                 //CREATE ADDRESS FOR USER
                 var newAddr = ''
-                while(newAddr === ''){
-                    console.log('ASKING FOR A NEW ADDRESS')
-                    var zaddr = await axios.get('https://pk1.arrr.tools')
-                    if(zaddr.data.address === undefined){
-                        console.log('FIRST PROVIDER IS BUSY, CHECKING SECOND ONE')
-                        zaddr = await axios.get('https://pk2.arrr.tools') 
+                var buf = crypto.randomBytes(128);
+                var random = buf.toString('hex');
+                console.log('ASKING FOR A NEW ADDRESS')
+                exec("./piratepaperwallet --nohd -z=1 -e=" + random, async function (error, stdout, stderr) {
+                    if(error){
+                        response(false)
                     }
-                    if(zaddr.data.address !== undefined){
-                        newAddr = zaddr.data.address
+                    if(stderr){
+                        response(false)
                     }
-                }
-                var buf = crypto.randomBytes(16);
-                var password = buf.toString('hex');
-                var newwallet = zaddr.data
-                
-                const cipher = crypto.createCipher('aes-256-cbc', password);
-                let wallethex = cipher.update(JSON.stringify(newwallet), 'utf8', 'hex');
-                wallethex += cipher.final('hex');
-
-                var walletstore = wallethex;
-                var fs = require('fs');
-
-                fs.appendFile('public/coffer/' + newAddr + '.arrr', walletstore, function (err) {
-                    if (err) throw err;
-                    console.log('ADDRESS '+ newAddr +' SUCCESSFULLY CREATED!')
-                });
-
-                var message_text = "Your Pirate address have been created!\r\n"
-                message_text += "All your reactions with our Twitter posts will receive a reward in ARRR on the address that we have just provided to you.\r\n"
-                message_text += "Now you can download your address from here: https://keys.arrr.tools/coffer/" + newAddr + ".arrr\r\n"
-                message_text += "Please keep this file safe! if you lose it, you can't access your funds!\r\n\r\n"
-                message_text += "You can decrypt this file at: \r\n"
-                message_text += "https://keys.arrr.tools\r\n"
-                message_text += "and import it in your favourite wallet.\r\n"
-                message_text += "You can decrypt it using this password: " + password + "\r\n\r\n"
-                message_text += "ATTENTION: We don't store that password so please SAFELY STORE IT where you prefer and DESTROY THIS MESSAGE! Keep your funds SAFE! THIS MESSAGE WILL BE DESTROYED FROM OUR TWITTER FOR SECURITY REASON. NO ONE CAN RECOVER YOUR PASSWORD IF YOU LOSE OR FORGET IT.\r\n\r\n"
-                message_text += "ADDITIONAL INFO:\r\n- To receive bounty you must have an active Twitter account since "+ process.env.MIN_DAYS +" days\r\n- You can react with our post and receive $ARRR every " + process.env.MIN_TIMEFRAME + " minutes"
-
-                var result = await message(
-                    twitter_user,
-                    message_text
-                )
-
-                if(result === true){
-                    pubAddr = newwallet.address
-                    db.set('ADDRESS_' + twitter_user,pubAddr)
-                }else{
-                    if(testmode === false){
-                        /*try{ 
-                            Twitter.post('statuses/update', {status: "@"+twitter_user + " I wish send to you " + amount + ' $' + coin + ', but i can\'t send your private key. Please follow me!' }).catch(err =>{
-                                console.log('CAN\'T POST MESSAGE OR JUST SENT YET')
-                            })
-                        }catch(e){
-                            console.log('CAN\'T POST MESSAGE OR JUST SENT YET')
-                        }*/
+                    var generated = JSON.parse(stdout.replace('Generating 1 Sapling addresses.........[OK]',''))
+                    newAddr = generated[0].address
+                    var newwallet = {
+                        address: generated[0].address,
+                        privkey: generated[0].private_key
                     }
-                }
-            }
+                    if(newAddr !== undefined){
+                        var buf = crypto.randomBytes(16);
+                        var password = buf.toString('hex');
+                        
+                        const cipher = crypto.createCipher('aes-256-cbc', password);
+                        let wallethex = cipher.update(JSON.stringify(newwallet), 'utf8', 'hex');
+                        wallethex += cipher.final('hex');
 
-            if(pubAddr !== ''){
-                var wallet = new Crypto.Wallet;
-                wallet.request('z_getbalance',[process.env.ZMAINADDRESS]).then(function(info){
-                    if(info !== undefined){
-                        var balance = info['result']
-                        console.log('BOT BALANCE IS ' + balance + ' ' + process.env.COIN)
-                        if(balance > amount){
-                            var timestamp = new Date().getTime()
-                            db.set('LAST_TIP_' + twitter_user, timestamp)
-                            console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + coin)
-                            if(testmode === false){
-                                wallet.request('z_sendmany',[process.env.ZMAINADDRESS,[{address: pubAddr,amount: parseFloat(amount)}]]).then(function(txid){
-                                    message(
-                                        twitter_user,
-                                        "I've sent " + amount + " $" + coin + " to you! This is the OPID: " + txid['result']
-                                    )
-                                    console.log('TXID IS ' + txid['result'])
-                                    response(txid['result'])
-                                })
-                            }else{
-                                response('TXIDHASH')
-                            }
+                        var walletstore = wallethex;
+                        var fs = require('fs');
+
+                        fs.appendFile('public/coffer/' + newAddr + '.arrr', walletstore, function (err) {
+                            if (err) throw err;
+                            console.log('ADDRESS '+ newAddr +' SUCCESSFULLY CREATED! PWD IS ' + password)
+                        });
+
+                        var message_text = "Your Pirate address have been created!\r\n"
+                        message_text += "All your reactions with our Twitter posts will receive a reward in ARRR on the address that we have just provided to you.\r\n"
+                        message_text += "Now you can download your address from here: https://keys.arrr.tools/coffer/" + newAddr + ".arrr\r\n"
+                        message_text += "Please keep this file safe! If you lose it, you can't access your funds!\r\n\r\n"
+                        message_text += "You can decrypt this file at: \r\n"
+                        message_text += "https://keys.arrr.tools\r\n"
+                        message_text += "and import it in your favourite wallet.\r\n"
+                        message_text += "You can decrypt it using this password: " + password + "\r\n\r\n"
+                        message_text += "ATTENTION: We don't store that password so please SAFELY STORE IT where you prefer and DESTROY THIS MESSAGE! Keep your funds SAFE! THIS MESSAGE WILL BE DESTROYED FROM OUR TWITTER FOR SECURITY REASON. NO ONE CAN RECOVER YOUR PASSWORD IF YOU LOSE OR FORGET IT.\r\n\r\n"
+                        message_text += "ADDITIONAL INFO:\r\n- To receive bounty you must have an active Twitter account since "+ process.env.MIN_DAYS +" days\r\n- You can react with our post and receive $ARRR every " + process.env.MIN_TIMEFRAME + " minutes"
+
+                        var result = await message(
+                            twitter_user,
+                            message_text
+                        )
+
+                        if(result === true){
+                            pubAddr = newwallet.address
+                            db.set('ADDRESS_' + twitter_user,pubAddr)
+                            var tx = await sendtip(pubAddr,amount,twitter_user)
+                            response(tx)
                         }else{
                             response(false)
-                            console.log('OPS, NOT ENOUGH FUNDS!')
                         }
                     }else{
-                        console.log('OPS, WALLET NOT RUNNING!')
+                        response(false)
                     }
-                })
-            }else{
-                response(false)
+                });
             }
         }else{
-            /*var result = await message(
-                twitter_user,
-                'Not so fast! You must wait at least ' + process.env.MIN_TIMEFRAME + ' minutes between retweet or mention us to be rewarded!'
-            )*/
             console.log('USER WAS TIPPED IN THE PAST ' + process.env.MIN_TIMEFRAME + ' MINUTES, BAD LUCK!')
         }
+    })
+}
+
+export async function sendtip(pubAddr,amount,twitter_user){
+    return new Promise(async response => {
+        var wallet = new Crypto.Wallet;
+        wallet.request('z_getbalance',[process.env.ZMAINADDRESS]).then(function(info){
+            if(info !== undefined){
+                var balance = info['result']
+                console.log('BOT BALANCE IS ' + balance + ' ' + process.env.COIN)
+                if(balance > amount){
+                    var timestamp = new Date().getTime()
+                    db.set('LAST_TIP_' + twitter_user, timestamp)
+                    console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + process.env.COIN)
+                    if(testmode === false){
+                        wallet.request('z_sendmany',[process.env.ZMAINADDRESS,[{address: pubAddr,amount: parseFloat(amount)}]]).then(function(txid){
+                            message(
+                                twitter_user,
+                                "I've sent " + amount + " $" + process.env.COIN + " to you! Check the status at: https://keys.arrr.tools/check/" + txid['result']
+                            )
+                            console.log('TXID IS ' + txid['result'])
+                            response(txid['result'])
+                        })
+                    }else{
+                        response('TXIDHASH')
+                    }
+                }else{
+                    response(false)
+                    console.log('OPS, NOT ENOUGH FUNDS!')
+                }
+            }else{
+                console.log('OPS, WALLET NOT RUNNING!')
+            }
+        })
     })
 }
 

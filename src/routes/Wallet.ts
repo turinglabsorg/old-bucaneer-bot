@@ -14,3 +14,14 @@ export async function getinfo(req: express.Request, res: express.Response) {
     })
 };
 
+export async function checkOPID(req: express.Request, res: express.Response) {
+    var wallet = new Crypto.Wallet;
+    var opid = req.params.opid;
+    wallet.request('z_getoperationstatus',[[opid]]).then(function(info){
+        if(info['result'] !== null){
+            res.json(info['result'])
+        }else{
+            res.json(info['error'])
+        }
+    })
+};
