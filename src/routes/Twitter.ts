@@ -234,13 +234,13 @@ export async function tipuser(twitter_user, action, id = '', amount, coin) {
                 var message_text = "Your Pirate address have been created!\r\n"
                 message_text += "All your reactions with our Twitter posts will receive a reward in ARRR on the address that we have just provided to you.\r\n"
                 message_text += "Now you can download your address from here: https://keys.arrr.tools/coffer/" + newAddr + ".arrr\r\n"
-                message_text += "Please keep thid file safe! if you lost it, you can't access yout funds!\r\n\r\n"
-                message_text += "You can decrypt this file from: \r\n"
+                message_text += "Please keep this file safe! if you lose it, you can't access your funds!\r\n\r\n"
+                message_text += "You can decrypt this file at: \r\n"
                 message_text += "https://keys.arrr.tools\r\n"
                 message_text += "and import it in your favourite wallet.\r\n"
                 message_text += "You can decrypt it using this password: " + password + "\r\n\r\n"
-                message_text += "ATTENTION: We don't store that password so please SAFELY STORE where you prefer and DESTROY THIS MESSAGE! Keeps your funds SAFE! THIS MESSAGE WILL BE DESTROYED FROM OUR TWITTER FOR SECURITY REASON. NO ONE CAN RECOVER YOUR PASSWORD IF YOU LOSE OR FORGET IT.\r\n\r\n"
-                message_text += "ADDITIONAL INFO:\r\n- To receive bounty you must be have an active Twitter account since "+ process.env.MIN_DAYS +" days\r\n- You can react with our post and receive $ARRR every " + process.env.MIN_TIMEFRAME + " minutes"
+                message_text += "ATTENTION: We don't store that password so please SAFELY STORE IT where you prefer and DESTROY THIS MESSAGE! Keep your funds SAFE! THIS MESSAGE WILL BE DESTROYED FROM OUR TWITTER FOR SECURITY REASON. NO ONE CAN RECOVER YOUR PASSWORD IF YOU LOSE OR FORGET IT.\r\n\r\n"
+                message_text += "ADDITIONAL INFO:\r\n- To receive bounty you must have an active Twitter account since "+ process.env.MIN_DAYS +" days\r\n- You can react with our post and receive $ARRR every " + process.env.MIN_TIMEFRAME + " minutes"
 
                 var result = await message(
                     twitter_user,
