@@ -3,6 +3,7 @@ import * as Utilities from './libs/Utilities'
 import * as Interface from "./routes/Interface"
 import * as Twitter from "./routes/Twitter"
 import * as Wallet from "./routes/Wallet"
+import * as Telegram from './routes/Telegram'
 import * as Crypto from './libs/Crypto'
 
 var bodyParser = require('body-parser')
@@ -23,7 +24,7 @@ class App {
     //app.express.get('/twitter/request-token',Twitter.getAuth)
     //app.express.get('/twitter/callback',Twitter.getAccessToken)
     app.express.get('/check/:opid',Wallet.checkOPID)
-
+    
     if(process.env.TWITTER_USERNAME !== undefined){
       Twitter.followers(process.env.TWITTER_USERNAME)
       Twitter.mentions(process.env.TWITTER_USERNAME)
@@ -33,6 +34,11 @@ class App {
         Twitter.mentions(process.env.TWITTER_USERNAME)
       },180000)
     }
+
+    if(process.env.TELEGRAM_TOKEN !== undefined){
+      Telegram.init()
+    }
+
   }
 }
 

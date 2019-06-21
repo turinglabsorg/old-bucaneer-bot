@@ -15,18 +15,12 @@ var testmode = process.env.TESTMODE.toLowerCase() == 'true' ? true : false;
 var exec = require('child_process').exec;
  
 if(testmode === true){
-    console.log('\x1b[33m%s\x1b[0m', 'RUNNING IN TEST MODE')
+    console.log('\x1b[33m%s\x1b[0m', 'RUNNING TWITTER IN TEST MODE')
 }
 
 if(config.access_token !== undefined && config.access_token_secret !== undefined){
     var Twitter = new twit(config);
 }
-
-const coinInfo = {
-    private: 0xae,
-    public: 0x30,
-    scripthash: 0x0d
-};
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
