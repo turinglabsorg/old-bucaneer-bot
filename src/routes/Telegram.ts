@@ -26,10 +26,26 @@ function sleep(ms) {
 export function init() {
     const token = process.env.TELEGRAM_TOKEN;
     const bot = new TelegramBot(token, {polling: true});
-    bot.onText(/\/echo (.+)/, (msg, match) => {
-        const chatId = msg.chat.id;
+    bot.onText(/\/ARRR (.+)/, (msg, match) => {
+        const chatId = msg.chat.id
         console.log('RECEIVED TELEGRAM MESSAGE FROM CHATID ' + chatId)
-        const resp = match[1];
-        bot.sendMessage(chatId, resp);
+        const resp = match[1]
+        switch(resp){
+            case "deposit":
+                var buf = crypto.randomBytes(128)
+                var random = buf.toString('hex')
+                exec("./piratepaperwallet --nohd -z=1 -e=" + random, async function (error, stdout, stderr) {
+                    if(error){
+                        bot.sendMessage(chatId, "WALLET IS UNREACHABLE");
+                    }
+                    if(stderr){
+                        bot.sendMessage(chatId, "WALLET IS UNREACHABLE");
+                    }
+                    var generated = JSON.parse(stdout.replace('Generating 1 Sapling addresses.........[OK]',''))
+                    bot.sendMessage(chatId, JSON.stringify(generated))
+                })
+            break;
+        }
+        
       });
 }
