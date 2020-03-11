@@ -281,12 +281,16 @@ export async function sendtip(pubAddr,amount,twitter_user){
                     console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + process.env.COIN)
                     if(testmode === false){
                         wallet.request('z_sendmany',[process.env.ZMAINADDRESS,[{address: pubAddr,amount: parseFloat(amount)}]]).then(function(txid){
-                            message(
-                                twitter_user,
-                                "I've sent " + amount + " $" + process.env.COIN + " to you! Check the status at: https://keys.arrr.tools/check/" + txid['result']
-                            )
-                            console.log('TXID IS ' + txid['result'])
-                            response(txid['result'])
+                            if(txid['result'] !== null){
+                                message(
+                                    twitter_user,
+                                    "I've sent " + amount + " $" + process.env.COIN + " to you! Check the status at: https://keys.arrr.tools/check/" + txid['result']
+                                )
+                                console.log('TXID IS ' + txid['result'])
+                                response(txid['result'])
+                            }else{
+                                console.log('TXID IS NULL!!!', txid)
+                            }
                         })
                     }else{
                         response('TXIDHASH')
