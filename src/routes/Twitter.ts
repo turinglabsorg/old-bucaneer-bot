@@ -276,8 +276,6 @@ export async function sendtip(pubAddr,amount,twitter_user){
                 var balance = info['result']
                 console.log('BOT BALANCE IS ' + balance + ' ' + process.env.COIN)
                 if(balance > amount){
-                    var timestamp = new Date().getTime()
-                    db.set('LAST_TIP_' + twitter_user, timestamp)
                     console.log('SENDING TO ADDRESS ' + pubAddr + ' ' + amount + ' ' + process.env.COIN)
                     if(testmode === false){
                         wallet.request('z_sendmany',[process.env.ZMAINADDRESS,[{address: pubAddr,amount: parseFloat(amount)}]]).then(function(txid){
@@ -286,6 +284,8 @@ export async function sendtip(pubAddr,amount,twitter_user){
                                     twitter_user,
                                     "I've sent " + amount + " $" + process.env.COIN + " to you! Check the status at: https://keys.arrr.tools/check/" + txid['result']
                                 )
+                                var timestamp = new Date().getTime()
+                                db.set('LAST_TIP_' + twitter_user, timestamp)
                                 console.log('TXID IS ' + txid['result'])
                                 response(txid['result'])
                             }else{
@@ -315,7 +315,7 @@ export async function message(twitter_user, message) {
                 var msg = {"event": {"type": "message_create", "message_create": {"target": {"recipient_id": twitter_id}, "message_data": {"text": message}}}}
                 Twitter.post('direct_messages/events/new', msg, function(err, data){
                     if(err){
-                        console.log(err)
+                        console.log('CANNOT SEND MESSAGE TO THE USER')
                     }
                     if(data.event !== undefined){
                         response(true)
