@@ -290,6 +290,7 @@ export async function sendtip(pubAddr,amount,twitter_user){
                                 response(txid['result'])
                             }else{
                                 console.log('TXID IS NULL!!!', txid)
+                                response(false)
                             }
                         })
                     }else{
