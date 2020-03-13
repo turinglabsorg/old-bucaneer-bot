@@ -296,6 +296,8 @@ export async function sendtip(pubAddr,amount,twitter_user){
                                         }else{
                                             response(false)
                                         }
+                                    }else{
+                                        response(false)
                                     }
                                 })
                             }else{
