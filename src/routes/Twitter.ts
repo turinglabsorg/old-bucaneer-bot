@@ -284,10 +284,18 @@ export async function sendtip(pubAddr,amount,twitter_user){
                                     twitter_user,
                                     "I've sent " + amount + " $" + process.env.COIN + " to you! Check the status at: https://keys.arrr.tools/check/" + txid['result']
                                 )
-                                var timestamp = new Date().getTime()
-                                db.set('LAST_TIP_' + twitter_user, timestamp)
-                                console.log('TXID IS ' + txid['result'])
-                                response(txid['result'])
+                                wallet.request('z_getoperationstatus',[[txid['result']]]).then(function(info){
+                                    if(info['result'] !== null){
+                                        if(info['result']['status'] === 'executing'){
+                                            var timestamp = new Date().getTime()
+                                            db.set('LAST_TIP_' + twitter_user, timestamp)
+                                            console.log('RESULT IS ', JSON.stringify(txid['result']))
+                                            response(txid['result'])   
+                                        }else{
+                                            response(false)
+                                        }
+                                    }
+                                })
                             }else{
                                 console.log('TXID IS NULL!!!', txid)
                                 response(false)
