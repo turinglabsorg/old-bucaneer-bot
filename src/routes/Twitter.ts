@@ -280,13 +280,15 @@ export async function sendtip(pubAddr,amount,twitter_user){
                     if(testmode === false){
                         wallet.request('z_sendmany',[process.env.ZMAINADDRESS,[{address: pubAddr,amount: parseFloat(amount)}]]).then(function(txid){
                             if(txid['result'] !== null){
-                                message(
-                                    twitter_user,
-                                    "I've sent " + amount + " $" + process.env.COIN + " to you! Check the status at: https://keys.arrr.tools/check/" + txid['result']
-                                )
+                                console.log('OPID IS ' + txid['result'])
                                 wallet.request('z_getoperationstatus',[[txid['result']]]).then(function(info){
+                                    console.log(info)
                                     if(info['result'] !== null){
                                         if(info['result']['status'] === 'executing'){
+                                            message(
+                                                twitter_user,
+                                                "I've sent " + amount + " $" + process.env.COIN + " to you! Check the status at: https://keys.arrr.tools/check/" + txid['result']
+                                            )
                                             var timestamp = new Date().getTime()
                                             db.set('LAST_TIP_' + twitter_user, timestamp)
                                             console.log('RESULT IS ', JSON.stringify(txid['result']))
