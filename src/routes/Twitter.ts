@@ -283,10 +283,8 @@ export async function sendtip(pubAddr,amount,twitter_user){
                                 console.log('OPID IS ' + txid['result'])
                                 wallet.request('z_getoperationstatus',[[txid['result']]]).then(function(info){
                                     console.log(info)
-                                    console.log(info['result'])
-                                    console.log(info['result']['error'])
                                     if(info['result'] !== null){
-                                        if(info['result']['error'] === null){
+                                        if(info['result'][0]['error'] === null){
                                             message(
                                                 twitter_user,
                                                 "I've sent " + amount + " $" + process.env.COIN + " to you! Check the status at: https://keys.arrr.tools/check/" + txid['result']
